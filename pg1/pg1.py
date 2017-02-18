@@ -153,6 +153,9 @@ class AdvancedRobot(Robot):
 	def process(self):
 		time.sleep(1)
 		flag = 0
+		if(len(self.memory) > 0 and self.x == self.memory[len(self.memory) - 1].getX() and self.y == self.memory[len(self.memory) - 1].getY()):
+			# remove memory module
+			self.memory.pop()
 		try:
 		# check top
 			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
@@ -185,31 +188,57 @@ class AdvancedRobot(Robot):
 				option.append(self.heuristic(self.x + 1, self.y, last_mem.getX(), last_mem.getY()))
 				option.append(self.heuristic(self.x, self.y + 1, last_mem.getX(), last_mem.getY()))
 				option.append(self.heuristic(self.x - 1, self.y, last_mem.getX(), last_mem.getY()))
-
+				best_option = 100
 				if(self.env.getObject(self.x, self.y - 1).isPassable() == False):
 					option[0] += 100
+				else:
+					best_option = option[0]
 				if(self.env.getObject(self.x + 1, self.y).isPassable() == False):
 					option[1] += 100
+				else:
+					if(option[1] < best_option):
+						best_option = option[1]
 				if(self.env.getObject(self.x, self.y + 1).isPassable() == False):
 					option[2] += 100
+				else:
+					if(option[2] < best_option):
+						best_option = option[2]
 				if(self.env.getObject(self.x - 1, self.y).isPassable() == False):
 					option[3] += 100
+				else:
+					if(option[3] < best_option):
+						best_option = option[3]
 				print("Possible paths: ")
 				print(option)
-
-				# pick lowest cost path
+				print("Best option is: " + str(best_option))
+				x_mod = 0
+				y_mod = 0
+				# pick lowest cost path as designated by best_option
+				for x in range(0, 4):
+					if(best_option == option[x]):
+						if(x == 0):
+							y_mod = -1
+						elif(x == 1):
+							x_mod = 1
+						elif(x == 2):
+							print("match")
+							y_mod = 1
+						elif(x == 3):
+							x_mod = -1
+				self.move(self.x + x_mod, self.y + y_mod)
+				return True
 
 			# check top
 			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
 				self.move(self.x, self.y - 1)
 			# check right
-			if(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
+			elif(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
 				self.move(self.x + 1, self.y)
 			# check below
-			if(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
+			elif(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
 				self.move(self.x, self.y + 1)
 			# check left
-			if(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
+			elif(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
 				self.move(self.x - 1, self.y)
 
 		except(Exception):
@@ -322,14 +351,16 @@ rb = AdvancedRobot()
 env.changeObjectState(3, 4, True)
 env.changeObjectState(4, 4, True)
 env.changeObjectState(2, 4, True)
+env.changeObjectState(4, 5, True)
 env.changeObjectState(2, 3, True)
 env.changeObjectState(4, 3, True)
 env.changeObjectState(5, 3, True)
+env.changeObjectState(4, 2, True)
 # set number of dirty rooms
 env.alterData(6)
 
 # Place Robot
-env.placeObject(2, 4, rb)
+env.placeObject(3, 4, rb)
 
 # Set up all metrics
 env.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
