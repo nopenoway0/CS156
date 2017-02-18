@@ -1,8 +1,15 @@
+import time
+import sys
+from math import sqrt
+
 def init_message():
 	print("**********************************\n")
 	print("****** X is a dirty room**********\n")
 	print("****** O is a clean room**********\n")
 	print("**********************************\n")
+
+def exit_message(data):
+	print("\nPerformance is: " + str(data) + "\nResults are measured from 0 - 10.\n10 efficiency 0 least")
 
 class Metric:
 	@staticmethod
@@ -11,7 +18,11 @@ class Metric:
 	
 	@staticmethod
 	def init_metric(metric):
-		raise NotImplemented("No metric initializer")
+		raise NotImplementedError("No metric initializer")
+
+	@staticmethod
+	def calc_metric(metric, data):
+		raise NotImplementedError("No metric calculator implemented")
 
 class Object:
 	def toString(self):
@@ -31,31 +42,189 @@ class Agent:
 	def setEnv(self, env):
 		raise NotImplementedError("No setEnv function")
 
-class Robot(Agent, Object):
+class Robot(Agent, Object, Metric):
 	def __init__(self):
 		self.started = False
+		self.env = None
+		self.current_room = None
+		self.x = None
+		self.y = None
+	# Search top -> right -> down -> left
 	def process(self):
-		pass
+		time.sleep(1)
+		try:
+			# check top
+			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
+				self.move(self.x, self.y - 1)
+			# check right
+			elif(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
+				self.move(self.x + 1, self.y)
+			# check below
+			elif(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
+				self.move(self.x, self.y + 1)
+			# check left
+			elif(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
+				self.move(self.x - 1, self.y)
+			else:
+				return False
+		except(Exception):
+			return False
+		return True
+
 	def start(self):
 		pass
+
 	def stop(self):
 		pass
-	def setEnv(self, env):
-		pass
+
+	def setEnv(self, x, y, env):
+		self.env = env
+		self.current_room = self.env.objects[y][x]
+		self.x = x
+		self.y = y
 	def toString(self):
-		pass
+		return "R "
+
 	def isPassable(self):
 		return False
+
 	def changeState(self):
 		pass
-		
+
+	def setRoom(self, room):
+		self.current_room = room
+
+	def getRoom(self):
+		return self.current_room
+
+	def suck(self):
+		self.current_room.set_condition(True)
+
+	def move(self, x, y):
+		self.suck()
+		self.env.placeObject(self.x, self.y, self.current_room)
+		self.suck()
+		self.env.placeObject(x, y, self)
+		self.x = x
+		self.y = y
+
+	@staticmethod
+	def metric_func(metric):
+		return metric + 1
+	
+	@staticmethod
+	def init_metric():
+		return 1
+
+	# where data is the number of dirty rooms
+	@staticmethod
+	def calc_metric(metric, data):
+		result = (float(data) / metric) * 10.0
+		if(result > 10 or metric < data):
+			raise Exception("Invalid Metric Measurement - Either corrupt data was used or metric wasn't finished")
+		else:
+			return result
+
+class MemoryObj:
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+
+	def getY(self):
+		return self.y
+
+	def getX(self):
+		return self.x
+	def setInfo(self, x, y):
+		# add error check
+		self.x = x
+		self.y = y
+
+class AdvancedRobot(Robot):
+	def __init__(self):
+		Robot.__init__(self)
+		self.memory = []
+
+	def heuristic(self, old_x, old_y, x, y):
+		x_diff = old_x - x
+		y_diff = old_y - y
+		return sqrt(x_diff*x_diff + y_diff*y_diff)
+
+	def process(self):
+		time.sleep(1)
+		flag = 0
+		try:
+		# check top
+			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
+				#self.move(self.x, self.y - 1)
+				flag += 1
+			# check right
+			if(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
+				#self.move(self.x + 1, self.y)
+				flag += 1
+			# check below
+			if(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
+				#self.move(self.x, self.y + 1)
+				flag += 1
+			# check left
+			if(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
+				#self.move(self.x - 1, self.y)
+				flag += 1
+			if(flag == 0 and len(self.memory) == 0):
+				return False
+			elif(flag > 1):
+				print("Adding Memory...")
+				self.memory.append(MemoryObj(self.x, self.y))
+			elif(flag == 0 and len(self.memory) > 0):
+				print("Accessing Memory...")
+				#find way back to latest memory
+				last_mem = self.memory[len(self.memory) - 1]
+				option = []
+				# add all possible options
+				option.append(self.heuristic(self.x, self.y - 1, last_mem.getX(), last_mem.getY()))
+				option.append(self.heuristic(self.x + 1, self.y, last_mem.getX(), last_mem.getY()))
+				option.append(self.heuristic(self.x, self.y + 1, last_mem.getX(), last_mem.getY()))
+				option.append(self.heuristic(self.x - 1, self.y, last_mem.getX(), last_mem.getY()))
+
+				if(self.env.getObject(self.x, self.y - 1).isPassable() == False):
+					option[0] += 100
+				if(self.env.getObject(self.x + 1, self.y).isPassable() == False):
+					option[1] += 100
+				if(self.env.getObject(self.x, self.y + 1).isPassable() == False):
+					option[2] += 100
+				if(self.env.getObject(self.x - 1, self.y).isPassable() == False):
+					option[3] += 100
+				print("Possible paths: ")
+				print(option)
+
+				# pick lowest cost path
+
+			# check top
+			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
+				self.move(self.x, self.y - 1)
+			# check right
+			if(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
+				self.move(self.x + 1, self.y)
+			# check below
+			if(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
+				self.move(self.x, self.y + 1)
+			# check left
+			if(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
+				self.move(self.x - 1, self.y)
+
+		except(Exception):
+			return False
+		return True
+
 class Room(Object):
 	def __init__(self):
 		self.condition = False
 		self.validRoom = False
+
 	def set_condition(self, status):
 		# Status - False = Dirty - True = Clean
 		self.condition = status
+
 	def toString(self):
 		picture = ""
 		if(self.validRoom == False):
@@ -68,8 +237,12 @@ class Room(Object):
 		return picture
 	def isPassable(self):
 		return self.validRoom
+
 	def changeState(self, newState):
 		self.validRoom = newState
+
+	def getCondition(self):
+		return self.condition
 
 class Environment:
 	def __init__(self):
@@ -78,42 +251,91 @@ class Environment:
 		self.objects = []
 		self.rows = None
 		self.columns = None
+		self.agent = None
+		self.metric_calc = None
+		self.data = None
 	# Takes a metric function and a metric initializer these will run after every update from the agent
-	def initialize_metric(self, metric_func, metric_init):
+	def initialize_metric(self, metric_func, metric_init, metric_calc):
 		self.metric_inc = metric_init()
 		self.metric_func = metric_func
+		self.metric_calc = metric_calc
+
 	# takes a time and initializes an array of specified length, must be of type object
 	def initialize_env(self, rows, columns, type):
 		self.rows = rows
 		self.columns = columns
-		for x in range(0, rows):
+		for y in range(0, columns):
 			self.objects.append([])
-			for y in range(0, columns):
-				self.objects[x].append(type())
+			for x in range(0, rows):
+				self.objects[y].append(type())
+
 	def toString(self):
 		string = ""
-		for x in range(0, self.rows):
-			for y in range(0, self.columns):
-				string += self.objects[x][y].toString()
+		for y in range(0, self.columns):
+			for x in range(0, self.rows):
+				string += self.objects[y][x].toString()
 			string += "\n"
 		return string
+
+	def getObject(self, x, y):
+		if(x > self.rows or y > self.columns):
+			return Room()
+		return self.objects[y][x]
+
 	def placeObject(self, x, y, repl):
 		if(x > self.rows or y > self.columns):
 			raise Exception("Out of environment bounds")
-		self.objects[x][y] = repl
+		if(isinstance(self.objects[y][x], Room) and self.objects[y][x].validRoom == False):
+			raise Exception("Out of environment bounds")
+		if(isinstance(repl, Agent)):
+			repl.setEnv(x, y, self)
+			self.agent = repl
+		self.objects[y][x] = repl
+
 	def changeObjectState(self, x, y, newState):
-		self.objects[x][y].changeState(newState)
+		self.objects[y][x].changeState(newState)
+
+	def stageEnv(self):
+		if(self.agent == None):
+			raise Exception("No Valid Agent")
+		while(self.agent.process()):
+			self.metric_inc = self.metric_func(self.metric_inc)
+			print(self.toString())
+		return self.metric_calc(self.metric_inc, self.data)
+
+	def alterData(self, param):
+		self.data = param
 #***********************************************MAIN METHOD*************************************************************************************************************************#
+# Welcome Message
 init_message()
+
+# Create Empty Environment
 env = Environment()
-env.initialize_env(5, 5, Room)
+
+# Initiliaze enviornment with size and object classes
+env.initialize_env(8, 8, Room)
+
+# Create Robot Agent
+rb = AdvancedRobot()
 
 # Build rooms
-env.changeObjectState(3,4, True)
-env.changeObjectState(2,4, True)
-env.changeObjectState(2,3, True)
-env.changeObjectState(2,2, True)
-env.changeObjectState(3,2, True)
+env.changeObjectState(3, 4, True)
+env.changeObjectState(4, 4, True)
+env.changeObjectState(2, 4, True)
+env.changeObjectState(2, 3, True)
+env.changeObjectState(4, 3, True)
+env.changeObjectState(5, 3, True)
+# set number of dirty rooms
+env.alterData(6)
 
-print(env.toString())
+# Place Robot
+env.placeObject(2, 4, rb)
 
+# Set up all metrics
+env.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
+
+# Start Simulation - output is performance metric
+performance = env.stageEnv();
+
+# Produce Metric Information
+exit_message(performance)
