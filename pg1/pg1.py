@@ -156,6 +156,8 @@ class AdvancedRobot(Robot):
 		if(len(self.memory) > 0 and self.x == self.memory[len(self.memory) - 1].getX() and self.y == self.memory[len(self.memory) - 1].getY()):
 			# remove memory module
 			self.memory.pop()
+		x_mod = 0
+		y_mod = 0
 		try:
 		# check top
 			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
@@ -176,10 +178,8 @@ class AdvancedRobot(Robot):
 			if(flag == 0 and len(self.memory) == 0):
 				return False
 			elif(flag > 1):
-				print("Adding Memory...")
 				self.memory.append(MemoryObj(self.x, self.y))
 			elif(flag == 0 and len(self.memory) > 0):
-				print("Accessing Memory...")
 				#find way back to latest memory
 				last_mem = self.memory[len(self.memory) - 1]
 				option = []
@@ -208,11 +208,7 @@ class AdvancedRobot(Robot):
 				else:
 					if(option[3] < best_option):
 						best_option = option[3]
-				print("Possible paths: ")
-				print(option)
-				print("Best option is: " + str(best_option))
-				x_mod = 0
-				y_mod = 0
+
 				# pick lowest cost path as designated by best_option
 				for x in range(0, 4):
 					if(best_option == option[x]):
@@ -221,7 +217,6 @@ class AdvancedRobot(Robot):
 						elif(x == 1):
 							x_mod = 1
 						elif(x == 2):
-							print("match")
 							y_mod = 1
 						elif(x == 3):
 							x_mod = -1
@@ -230,17 +225,17 @@ class AdvancedRobot(Robot):
 
 			# check top
 			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
-				self.move(self.x, self.y - 1)
+				y_mod = -1
 			# check right
 			elif(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
-				self.move(self.x + 1, self.y)
+				x_mod = 1
 			# check below
 			elif(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
-				self.move(self.x, self.y + 1)
+				y_mod = 1
 			# check left
 			elif(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
-				self.move(self.x - 1, self.y)
-
+				x_mod = -1
+			self.move(self.x + x_mod, self.y + y_mod)
 		except(Exception):
 			return False
 		return True
@@ -257,7 +252,7 @@ class Room(Object):
 	def toString(self):
 		picture = ""
 		if(self.validRoom == False):
-			picture += " "
+			picture += "."
 		elif(self.condition == False):
 			picture += "X"
 		else:
@@ -348,6 +343,7 @@ env.initialize_env(8, 8, Room)
 rb = AdvancedRobot()
 
 # Build rooms
+env.changeObjectState(3, 5, True)
 env.changeObjectState(3, 4, True)
 env.changeObjectState(4, 4, True)
 env.changeObjectState(2, 4, True)
