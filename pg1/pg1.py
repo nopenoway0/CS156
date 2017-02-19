@@ -50,25 +50,62 @@ class Robot(Agent, Object, Metric):
 		self.current_room = None
 		self.x = None
 		self.y = None
+		self.cleaned_room = 0
 	# Search top -> right -> down -> left
 	def process(self):
 		time.sleep(1)
 		try:
-			# check top
-			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
-				self.move(self.x, self.y - 1)
-			# check right
-			elif(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
-				self.move(self.x + 1, self.y)
-			# check below
-			elif(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
-				self.move(self.x, self.y + 1)
-			# check left
-			elif(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
-				self.move(self.x - 1, self.y)
-			else:
-				return False
+			flag = self.checkDirtySquares()
+
+			#make pass through environment
+			if(self.cleaned_room < self.env.getNumDirtyRooms() and flag == False):
+				flag = True
+				if(self.env.getObject(self.x, self.y - 1).isPassable()):
+					while(self.env.getObject(self.x, self.y - 1).isPassable()):
+						if(self.checkDirtySquares() == False and self.cleaned_room < self.env.getNumDirtyRooms()):
+							self.move(self.x, self.y - 1)
+						else:
+							return True
+				# check right
+				elif(self.env.getObject(self.x + 1, self.y).isPassable()):
+					while(self.env.getObject(self.x + 1, self.y).isPassable()):
+						if(self.checkDirtySquares() == False):
+							self.move(self.x + 1, self.y)
+						else:
+							return True
+				# check below
+				elif(self.env.getObject(self.x, self.y + 1).isPassable()):
+					while(self.env.getObject(self.x, self.y + 1).isPassable()):
+						if(self.checkDirtySquares() == False and self.cleaned_room < self.env.getNumDirtyRooms()):
+							self.move(self.x, self.y + 1)
+						else:
+							return True
+				# check left
+				elif(self.env.getObject(self.x - 1, self.y).isPassable()):
+					while(self.env.getObject(self.x - 1, self.y).isPassable()):
+						if(self.checkDirtySquares() == False and self.cleaned_room < self.env.getNumDirtyRooms()):
+							self.move(self.x - 1, self.y)
+						else:
+							return True
+				else:
+					flag = False	
 		except(Exception):
+			return False
+		return flag
+
+	def checkDirtySquares(self):
+		if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
+			self.move(self.x, self.y - 1)
+		# check right
+		elif(self.env.getObject(self.x + 1, self.y).getCondition() is False and self.env.getObject(self.x + 1, self.y).isPassable()):
+			self.move(self.x + 1, self.y)
+		# check below
+		elif(self.env.getObject(self.x, self.y + 1).getCondition() is False and self.env.getObject(self.x, self.y + 1).isPassable()):
+			self.move(self.x, self.y + 1)
+		# check left
+		elif(self.env.getObject(self.x - 1, self.y).getCondition() is False and self.env.getObject(self.x - 1, self.y).isPassable()):
+			self.move(self.x - 1, self.y)
+		else:
 			return False
 		return True
 
@@ -99,7 +136,10 @@ class Robot(Agent, Object, Metric):
 		return self.current_room
 
 	def suck(self):
-		self.current_room.set_condition(True)
+		if(self.current_room.getCondition() == False):
+			self.current_room.set_condition(True)
+			self.cleaned_room = self.cleaned_room + 1
+			print(self.cleaned_room)
 
 	def move(self, x, y):
 		self.suck()
@@ -282,6 +322,7 @@ class Environment:
 		self.agent = None
 		self.metric_calc = None
 		self.data = None
+		self.num_dirt = 0
 	# Takes a metric function and a metric initializer these will run after every update from the agent
 	def initialize_metric(self, metric_func, metric_init, metric_calc):
 		self.metric_inc = metric_init()
@@ -317,7 +358,12 @@ class Environment:
 			raise Exception("Out of environment bounds")
 		if(isinstance(repl, Agent)):
 			repl.setEnv(x, y, self)
+			self.objects[y][x] = repl
+			if(self.metric_func != None):
+				self.metric_inc = self.metric_func(self.metric_inc)
+				print(self.toString())
 			self.agent = repl
+			return
 		self.objects[y][x] = repl
 
 	def changeObjectState(self, x, y, newState):
@@ -327,12 +373,20 @@ class Environment:
 		if(self.agent == None):
 			raise Exception("No Valid Agent")
 		while(self.agent.process()):
-			self.metric_inc = self.metric_func(self.metric_inc)
-			print(self.toString())
+			pass	
 		return self.metric_calc(self.metric_inc, self.data)
 
 	def alterData(self, param):
 		self.data = param
+
+	def getData(self):
+		return data
+
+	def numDirtyRooms(self, num):
+		self.num_dirt = num
+
+	def getNumDirtyRooms(self):
+		return self.num_dirt
 #***********************************************MAIN METHOD*************************************************************************************************************************#
 # Welcome Message
 init_message()
@@ -348,14 +402,19 @@ rb2 = Robot()
 # Build rooms
 env.changeObjectState(3, 5, True)
 env.changeObjectState(3, 4, True)
+env.changeObjectState(3, 3, True)
 env.changeObjectState(4, 4, True)
 env.changeObjectState(2, 4, True)
 env.changeObjectState(4, 5, True)
 env.changeObjectState(2, 3, True)
+env.changeObjectState(2, 3, True)
 env.changeObjectState(4, 3, True)
 env.changeObjectState(5, 3, True)
 env.changeObjectState(4, 2, True)
+env.changeObjectState(4, 1, True)
+env.changeObjectState(4, 0, True)
 # set number of dirty rooms
+env.numDirtyRooms(13)
 
 env2 = copy.deepcopy(env)
 
