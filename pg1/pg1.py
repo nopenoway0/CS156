@@ -1,6 +1,7 @@
 import time
 import sys
 from math import sqrt
+import copy
 
 def init_message():
 	print("**********************************\n")
@@ -239,6 +240,9 @@ class AdvancedRobot(Robot):
 		except(Exception):
 			return False
 		return True
+	@staticmethod
+	def calc_metric(metric, data):
+		return metric
 
 class Room(Object):
 	def __init__(self):
@@ -335,13 +339,12 @@ init_message()
 
 # Create Empty Environment
 env = Environment()
-
 # Initiliaze enviornment with size and object classes
 env.initialize_env(8, 8, Room)
 
 # Create Robot Agent
 rb = AdvancedRobot()
-
+rb2 = Robot()
 # Build rooms
 env.changeObjectState(3, 5, True)
 env.changeObjectState(3, 4, True)
@@ -353,16 +356,21 @@ env.changeObjectState(4, 3, True)
 env.changeObjectState(5, 3, True)
 env.changeObjectState(4, 2, True)
 # set number of dirty rooms
-env.alterData(6)
+
+env2 = copy.deepcopy(env)
 
 # Place Robot
 env.placeObject(3, 4, rb)
 
 # Set up all metrics
-env.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
+env.initialize_metric(Robot.metric_func, Robot.init_metric, AdvancedRobot.calc_metric)
+
+env2.placeObject(3, 4, rb2)
+env2.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
 
 # Start Simulation - output is performance metric
-performance = env.stageEnv();
-
+metric_base = env.stageEnv();
+env2.alterData(metric_base)
+performance = env2.stageEnv()
 # Produce Metric Information
 exit_message(performance)
