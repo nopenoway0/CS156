@@ -53,7 +53,7 @@ class Robot(Agent, Object, Metric):
 		self.cleaned_room = 0
 	# Search top -> right -> down -> left
 	def process(self):
-		time.sleep(1)
+		#time.sleep(1)
 		try:
 			flag = self.checkDirtySquares()
 
@@ -148,6 +148,8 @@ class Robot(Agent, Object, Metric):
 		self.env.placeObject(x, y, self)
 		self.x = x
 		self.y = y
+		print(self.env.toString())
+		time.sleep(1)
 
 	@staticmethod
 	def metric_func(metric):
@@ -192,7 +194,7 @@ class AdvancedRobot(Robot):
 		return sqrt(x_diff*x_diff + y_diff*y_diff)
 
 	def process(self):
-		time.sleep(1)
+		#time.sleep(1) moved to "move" in robot
 		flag = 0
 		if(len(self.memory) > 0 and self.x == self.memory[len(self.memory) - 1].getX() and self.y == self.memory[len(self.memory) - 1].getY()):
 			# remove memory module
@@ -361,7 +363,7 @@ class Environment:
 			self.objects[y][x] = repl
 			if(self.metric_func != None):
 				self.metric_inc = self.metric_func(self.metric_inc)
-				print(self.toString())
+				#print(self.toString()) moved to the agent move function
 			self.agent = repl
 			return
 		self.objects[y][x] = repl
@@ -414,8 +416,8 @@ env.changeObjectState(4, 2, True)
 env.changeObjectState(4, 1, True)
 env.changeObjectState(4, 0, True)
 # set number of dirty rooms
-env.numDirtyRooms(13)
-
+env.numDirtyRooms(12)
+env.alterData(12)
 env2 = copy.deepcopy(env)
 
 # Place Robot
