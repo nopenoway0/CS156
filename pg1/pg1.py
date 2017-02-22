@@ -193,6 +193,12 @@ class AdvancedRobot(Robot):
 		y_diff = old_y - y
 		return sqrt(x_diff*x_diff + y_diff*y_diff)
 
+	def checkComplete(self):
+		if(self.env.getNumDirtyRooms() <= 0):
+			return True
+		else:
+			return False
+
 	def process(self):
 		#time.sleep(1) moved to "move" in robot
 		flag = 0
@@ -201,6 +207,8 @@ class AdvancedRobot(Robot):
 			self.memory.pop()
 		x_mod = 0
 		y_mod = 0
+		if(self.checkComplete()):
+			return False
 		try:
 		# check top
 			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
@@ -267,6 +275,8 @@ class AdvancedRobot(Robot):
 				return True
 
 			# check top
+			if(self.checkComplete()):
+				return False
 			if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
 				y_mod = -1
 			# check right
@@ -402,22 +412,26 @@ env.initialize_env(8, 8, Room)
 rb = AdvancedRobot()
 rb2 = Robot()
 # Build rooms
-env.changeObjectState(3, 5, True)
-env.changeObjectState(3, 4, True)
-env.changeObjectState(3, 3, True)
-env.changeObjectState(4, 4, True)
-env.changeObjectState(2, 4, True)
-env.changeObjectState(4, 5, True)
-env.changeObjectState(2, 3, True)
-env.changeObjectState(2, 3, True)
-env.changeObjectState(4, 3, True)
 env.changeObjectState(5, 3, True)
+env.changeObjectState(5, 5, True)
+env.changeObjectState(6, 5, True)
+env.changeObjectState(6, 6, True)
+env.changeObjectState(5, 6, True)
+env.changeObjectState(4, 5, True)
+env.changeObjectState(4, 4, True)
+env.changeObjectState(4, 3, True)
 env.changeObjectState(4, 2, True)
 env.changeObjectState(4, 1, True)
 env.changeObjectState(4, 0, True)
+env.changeObjectState(3, 5, True)
+env.changeObjectState(3, 4, True)
+env.changeObjectState(3, 3, True)
+env.changeObjectState(2, 4, True)
+env.changeObjectState(2, 3, True)
+
 # set number of dirty rooms
-env.numDirtyRooms(12)
-env.alterData(12)
+env.numDirtyRooms(20)
+env.alterData(20)
 env2 = copy.deepcopy(env)
 
 # Place Robot
