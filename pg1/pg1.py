@@ -162,6 +162,7 @@ class Robot(Agent, Object, Metric):
 	# where data is the number of dirty rooms
 	@staticmethod
 	def calc_metric(metric, data):
+		metric = metric - 1
 		result = (float(data) / metric) * 10.0
 		if(result > 10 or metric < data):
 			raise Exception("Invalid Metric Measurement - Either corrupt data was used or metric wasn't finished")
@@ -406,46 +407,25 @@ init_message()
 # Create Empty Environment
 env = Environment()
 # Initiliaze enviornment with size and object classes
-env.initialize_env(8, 8, Room)
+env.initialize_env(4, 4, Room)
 
 # Create Robot Agent
-rb = AdvancedRobot()
-rb2 = Robot()
-# Build rooms
-env.changeObjectState(5, 3, True)
-env.changeObjectState(5, 5, True)
-env.changeObjectState(6, 5, True)
-env.changeObjectState(6, 6, True)
-env.changeObjectState(5, 6, True)
-env.changeObjectState(4, 5, True)
-env.changeObjectState(4, 4, True)
-env.changeObjectState(4, 3, True)
-env.changeObjectState(4, 2, True)
-env.changeObjectState(4, 1, True)
-env.changeObjectState(4, 0, True)
-env.changeObjectState(3, 5, True)
-env.changeObjectState(3, 4, True)
-env.changeObjectState(3, 3, True)
-env.changeObjectState(2, 4, True)
-env.changeObjectState(2, 3, True)
+rb = Robot()
 
+env.changeObjectState(0,0, True)
+env.changeObjectState(1,0, True)
 # set number of dirty rooms
-env.numDirtyRooms(20)
-env.alterData(20)
-env2 = copy.deepcopy(env)
+env.numDirtyRooms(2)
+env.alterData(2)
 
 # Place Robot
-env.placeObject(3, 4, rb)
+env.placeObject(0, 0, rb)
 
 # Set up all metrics
-env.initialize_metric(Robot.metric_func, Robot.init_metric, AdvancedRobot.calc_metric)
-
-env2.placeObject(3, 4, rb2)
-env2.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
+env.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
 
 # Start Simulation - output is performance metric
-metric_base = env.stageEnv();
-env2.alterData(metric_base)
-performance = env2.stageEnv()
+performance = env.stageEnv()
+
 # Produce Metric Information
 exit_message(performance)
