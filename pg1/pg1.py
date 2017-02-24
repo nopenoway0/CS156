@@ -2,6 +2,7 @@ import time
 import sys
 from math import sqrt
 import copy
+import os
 
 def init_message():
 	print("**********************************\n")
@@ -73,18 +74,18 @@ class Robot(Agent, Object, Metric):
 							self.move(self.x + 1, self.y)
 						else:
 							return True
-				# check below
-				elif(self.env.getObject(self.x, self.y + 1).isPassable()):
-					while(self.env.getObject(self.x, self.y + 1).isPassable()):
-						if(self.checkDirtySquares() == False and self.cleaned_room < self.env.getNumDirtyRooms()):
-							self.move(self.x, self.y + 1)
-						else:
-							return True
 				# check left
 				elif(self.env.getObject(self.x - 1, self.y).isPassable()):
 					while(self.env.getObject(self.x - 1, self.y).isPassable()):
 						if(self.checkDirtySquares() == False and self.cleaned_room < self.env.getNumDirtyRooms()):
 							self.move(self.x - 1, self.y)
+						else:
+							return True
+				# check below
+				elif(self.env.getObject(self.x, self.y + 1).isPassable()):
+					while(self.env.getObject(self.x, self.y + 1).isPassable()):
+						if(self.checkDirtySquares() == False and self.cleaned_room < self.env.getNumDirtyRooms()):
+							self.move(self.x, self.y + 1)
 						else:
 							return True
 				else:
@@ -148,7 +149,13 @@ class Robot(Agent, Object, Metric):
 		self.env.placeObject(x, y, self)
 		self.x = x
 		self.y = y
+		# Flush and print
+		if(os.name is "posix"):
+			os.system("clear")
+		else:
+			os.system("cls")
 		print(self.env.toString())
+		#
 		time.sleep(1)
 
 	@staticmethod
@@ -380,6 +387,8 @@ class Environment:
 		self.objects[y][x] = repl
 
 	def changeObjectState(self, x, y, newState):
+		if(isinstance(self.objects[y][x], Room) and newState == True and self.objects[y][x].condition == False):
+			self.num_dirt = self.num_dirt + 1
 		self.objects[y][x].changeState(newState)
 
 	def stageEnv(self):
@@ -414,9 +423,11 @@ rb = Robot()
 
 env.changeObjectState(0,0, True)
 env.changeObjectState(1,0, True)
+env.changeObjectState(0,1, True)
+env.changeObjectState(2,0, True)
+env.changeObjectState(2,1, True)
 # set number of dirty rooms
-env.numDirtyRooms(2)
-env.alterData(2)
+env.alterData(env.getNumDirtyRooms())
 
 # Place Robot
 env.placeObject(0, 0, rb)
@@ -425,6 +436,7 @@ env.placeObject(0, 0, rb)
 env.initialize_metric(Robot.metric_func, Robot.init_metric, Robot.calc_metric)
 
 # Start Simulation - output is performance metric
+print(env.toString())
 performance = env.stageEnv()
 
 # Produce Metric Information
