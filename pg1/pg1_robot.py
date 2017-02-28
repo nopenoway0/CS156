@@ -11,13 +11,14 @@ import sys
 class Robot(Agent, Object, Metric):
 
 	# Declares all variables to 0
-	def __init__(self):
+	def __init__(self, wait_time):
 		self.started = False
 		self.env = None
 		self.current_room = None
 		self.x = None
 		self.y = None
 		self.cleaned_room = 0
+		self.wait_time = wait_time
 	# Search top -> right -> down -> left
 	def process(self):
 		flag = False
@@ -95,7 +96,7 @@ class Robot(Agent, Object, Metric):
 			os.system("cls")
 		print(self.env.toString())
 		#
-		time.sleep(1)
+		time.sleep(self.wait_time)
 
 	# returns cleaned rooms to the metric variable in the environment that is calling it
 	@staticmethod
@@ -113,13 +114,19 @@ class Robot(Agent, Object, Metric):
 	# where data is the number of dirty rooms and the metric is the rooms cleaned. Will be called once agent tells the enviornment it has finished
 	@staticmethod
 	def calc_metric(metric, data):
-		metric = metric + 1
-		if(metric > data):
-			raise Exception("Invalid Metric Measurement - Either corrupt data was used or metric wasn't finished")
+		if(metric > 0 and metric < data):
+			metric = metric + 1
+		#if(metric > data):
+			#raise Exception("Invalid Metric Measurement - Either corrupt data was used or metric wasn't finished")
+		#else:
+		result = data - metric
+		if(data == 0):
+			print("No rooms to clean")
+			return 0
+		elif(metric < data):
+			print("Cleaned " + str(metric) + " out of " + str(data) + " rooms. Incomplete.")
+		elif(metric == data):
+			print("Cleaned all " + str(data) + " rooms. Completed Run.")
 		else:
-			result = data - metric
-			if(metric < data):
-				print("Cleaned " + str(metric) + " out of " + str(data) + " rooms. Incomplete.")
-			elif(metric == data):
-				print("Cleaned all " + str(data) + " rooms. Completed Run.")
-			return result
+			print("cleaned " + str(metric - 2) + " rooms out of " + str(data))
+		return result
