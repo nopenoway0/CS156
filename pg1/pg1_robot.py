@@ -128,5 +128,7 @@ class Robot(Agent, Object, Metric):
 		elif(metric == data):
 			print("Cleaned all " + str(data) + " rooms. Completed Run.")
 		else:
-			print("cleaned " + str(metric - 2) + " rooms out of " + str(data))
+			while(metric > data):
+				metric = metric - 1
+			print("cleaned " + str(metric) + " rooms out of " + str(data))
 		return result
