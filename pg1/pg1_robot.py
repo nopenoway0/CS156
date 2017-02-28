@@ -19,8 +19,19 @@ class Robot(Agent, Object, Metric):
 		self.y = None
 		self.cleaned_room = 0
 		self.wait_time = wait_time
+
+
+	def reset(self):
+		self.start = False
+		self.env = None
+		self.current_room = None
+		self.x = None
+		self.y = None
+		self.cleaned_room = 0
 	# Search top -> right -> down -> left
 	def process(self):
+		if(self.current_room != None and self.current_room.getCondition() == False):
+			self.suck()
 		flag = False
 		try:
 			flag = self.checkDirtySquares()
@@ -28,7 +39,7 @@ class Robot(Agent, Object, Metric):
 			print(E)
 			return False
 		return flag
-
+	
 	# Checks 4 directions around self for dirty squares - if it finds one it will vacuum the current square and move to it
 	def checkDirtySquares(self):
 		if(self.env.getObject(self.x, self.y - 1).getCondition() is False and self.env.getObject(self.x, self.y - 1).isPassable()):
@@ -80,12 +91,11 @@ class Robot(Agent, Object, Metric):
 		if(self.current_room.getCondition() == False):
 			self.current_room.set_condition(True)
 			self.cleaned_room = self.cleaned_room + 1
-			print(self.cleaned_room)
 
 	def move(self, x, y):
 		self.suck()
 		self.env.placeObject(self.x, self.y, self.current_room)
-		self.suck()
+		#self.suck()
 		self.env.placeObject(x, y, self)
 		self.x = x
 		self.y = y
