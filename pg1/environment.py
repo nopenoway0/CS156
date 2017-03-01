@@ -16,7 +16,6 @@ class Environment:
 		self.metric_calc = None
 		self.data = None
 		self.num_dirt = 0
-
 	# Takes a metric function and a metric initializer these will run after every update from the agent
 	def initialize_metric(self, metric_func, metric_init, metric_calc):
 		self.metric_inc = metric_init()
@@ -43,7 +42,7 @@ class Environment:
 
 	# returns objects at specified coordinates
 	def getObject(self, x, y):
-		if(x > self.rows or y > self.columns):
+		if(x >= self.rows or y >= self.columns):
 			return Room()
 		return self.objects[y][x]
 
@@ -89,7 +88,6 @@ class Environment:
 	# Returns number of dirty Rooms
 	def getNumDirtyRooms(self):
 		return self.num_dirt
-
 
 class Room(Object):
 	def __init__(self):

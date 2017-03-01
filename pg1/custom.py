@@ -4,13 +4,13 @@ from environment import Room
 from pg1_robot import Robot
 env_dimensions = []
 
-env_dimensions.append(raw_input("Enter x dimension of environment space: "))
-env_dimensions.append(raw_input("Enter y dimension of environment space: "))
+env_dimensions.append(raw_input("Enter amount of rows in environment space: "))
+env_dimensions.append(raw_input("Enter amount of columns in environment space: "))
 
 print("Created " + str(env_dimensions[0]) + "x" + str(env_dimensions[1]) + " environment\n")
 
 env = Environment()
-env.initialize_env(int(env_dimensions[0]), int(env_dimensions[1]), Room)
+env.initialize_env(int(env_dimensions[1]), int(env_dimensions[0]), Room)
 
 print(". are empty spaces X are dirty rooms and O are clean rooms\n\n" + env.toString())
 
