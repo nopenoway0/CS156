@@ -1,4 +1,5 @@
 import cs156_logic as cl
+import agents as age
 
 def wumpus1():
 	print("\nWumpus 1 start\n")
@@ -47,3 +48,9 @@ def tests(kb):
 kb = wumpus1()
 #print("Printing all rules from wumpus1: " + str(kb.clauses))
 print(tests(kb))
+env = age.WumpusEnvironment(8, 8)
+env.add_object(age.Gold(), (3,3))
+env.add_object(age.Wumpus(), (3,4))
+env.add_object(age.Pit(), (2,2))
+print(env.objects_at((3,2)))
+print(env.objects_at((2,1)))
