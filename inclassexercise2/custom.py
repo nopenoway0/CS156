@@ -10,13 +10,13 @@ def wumpus1():
 	kb.tell(cl.expr("~B11"))
 	kb.tell(cl.expr("B21"))
 
-
 	# Rule 6 - 10
 	kb.tell(cl.expr("B11 >> (P12 | P21) & ((P12 | P21)) >> B11"))
 	kb.tell(cl.expr("((P12 | P21) >> B11)"))
 	kb.tell(cl.expr("~B11 >> ~(P12 | P21)"))
 	kb.tell(cl.expr("~(P12 | P21)"))
 	kb.tell(cl.expr("~P12 & ~P21"))
+
 	# Rule 11 - 15
 	kb.tell(cl.expr("~B12"))
 	kb.tell(cl.expr("B12 <=> (P11 | P22 | P13)"))
