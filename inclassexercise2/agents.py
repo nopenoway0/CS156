@@ -225,6 +225,7 @@ class Environment:
 	object.location = location or self.default_location(object)
 	self.objects.append(object)
 	if isinstance(object, Agent):
+            print("adding: " + str(object))
             object.performance = 0
             self.agents.append(object)
 	return self
@@ -425,6 +426,8 @@ class WumpusEnvironment(XYEnvironment):
     object_classes = [Wall, Gold, Pit, Arrow, Wumpus, Explorer]
     def __init__(self, width=10, height=10):
         XYEnvironment.__init__(self, width, height)
+        self.agents = []
+        self.objects = []
         self.add_walls()  
 
     def add_object(self, object, location=(1, 1)):
@@ -443,6 +446,7 @@ class WumpusEnvironment(XYEnvironment):
             XYEnvironment.add_object(self, object.get_sense(), tmp)
 
 
+
     def percept(self, agent):
         """The percept is a tuple of ('Dirty' or 'Clean', 'Bump' or 'None').
         Unlike the TrivialVacuumEnvironment, location is NOT perceived."""
@@ -450,8 +454,7 @@ class WumpusEnvironment(XYEnvironment):
         #status =  if_(self.find_at(Dirt, agent.location), 'Dirty', 'Clean')
         #bump = if_(agent.bump, 'Bump', 'None')
         #return (status, bump)
-        
-        location, direction, stench, breeze, glitter, bump, scream = None
+        location, direction, stench, breeze, glitter, bump, scream = ("", )*7
         location = agent.location
         direction = agent.orientation
         stench = "None"
@@ -459,8 +462,9 @@ class WumpusEnvironment(XYEnvironment):
         glitter = if_(self.find_at(Glitter, tuple(sum(item) for item in zip(location, direction))), "Glitter", "None")
         bump = "None"
         scream = "None"
-        return (location, direction, stench, breeze, bump, scream)
-    
+        return tuple(location, direction, stench, breeze, bump, scream)
+    #def program(self):
+    #    print("Running")
 #______________________________________________________________________________
 
 def compare_agents(EnvFactory, AgentFactories, n=10, steps=1000):
