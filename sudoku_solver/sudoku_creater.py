@@ -53,20 +53,63 @@ class Sudoku:
 
 		# need to make this an array
 		cur_col = [0] * 11
+		cur_col[10] = 1
+		count = 0
+		retry_row = False
 		# second row creation
 		#for x in range(0,9):
 		# test for x = 1 - 1, row before or second row
-		for y in range(1,9):
-			cur_col[self.puzzle[0][y]] = 1
-			# 1 so current row
-			used_num[self.puzzle[1][y - 1]] = 1
-			while(cur_col[buff] != 0 or used_num[buff] != 0):
-				print(str(cur_col) + "::::::" + str(used_num) + "::::" + str(buff))
-				buff = random.randrange(1,10)
-			self.puzzle[1][y] = buff
-			# reset column checker
-			for x in range(0,10):
-				cur_col[x] = 0
+		# custom x range variable
+		x = 0
+		while(x < 8):
+			x = x + 1
+			if(retry_row == True):
+				x = x - 1
+				retry_row = False
+			for y in range(1, 9):
+				for z in range(0,x):
+					cur_col[self.puzzle[z][y]] = 1
+
+				used_num[self.puzzle[x][y - 1]] = 1
+				count = 0
+				while(cur_col[buff] != 0 or used_num[buff] != 0 and retry_row == False):
+					buff = random.randrange(1,10)
+					count = count + 1
+					if(count > 100):
+						retry_row = True
+				self.puzzle[x][y] = buff
+				# reset column checker
+				for r in range(0,10):
+					cur_col[r] = 0
+				if(retry_row):
+					#print("Retry row")
+					for z in range(1,9):
+						self.puzzle[x][z] = -1
+					break
+			for r in range(0,10):
+				used_num[r] = 0
+
+	def verify(self):
+		used_num = [0] * 10
+		for x in range (0,9):
+			for y in range (0,9):
+				if(used_num[self.puzzle[x][y]] == 1):
+					return (False, y + 1, x + 1, self.puzzle[x][y])
+				else:
+					used_num[self.puzzle[x][y]] = 1
+			#reset used numbers
+			for r in range(0,10):
+				used_num[r] = 0
+		for y in range (0,9):
+			for x in range (0,9):
+				if(used_num[self.puzzle[x][y]] == 1):
+					return (False, y + 1, x + 1, self.puzzle[x][y])
+				else:
+					used_num[self.puzzle[x][y]] = 1
+			#reset used numbers
+			for r in range(0,10):
+				used_num[r] = 0
+		return True
 
 
 
@@ -79,3 +122,5 @@ else:
 	os.system("clear")
 '''
 print(test)
+
+print("Integrity: " + str(test.verify()))
