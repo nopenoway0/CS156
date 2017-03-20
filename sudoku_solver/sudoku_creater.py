@@ -195,7 +195,6 @@ while(1):
 		else:
 			try:
 				puzzle.execute(command)
-				break
 			except:
 				pass
 	else:
