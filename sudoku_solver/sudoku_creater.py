@@ -35,69 +35,71 @@ class Sudoku:
 		return self.__str__()
 
 	def generate(self):
-		used_num = [0] * 11
-		used_num[10] = 1
-		buff = 10
-		# first row permutation of 1-9
+		# Create first square
+		avail_num = [0] * 11
+		sequence = [0] * 10
 		for y in range(0,9):
-			while(used_num[buff] != 0):
-				buff = random.randrange(1, 10)
-			self.puzzle[0][y] = buff
-			used_num[buff] = 1
-
-		for x in range(0, 10):
-			used_num[x] = 0
-
-		buff = 10
-		used_num[self.puzzle[0][0]] = 1
-
-		for x in range(1,9):
-			while(used_num[buff] != 0):
-				buff = random.randrange(1, 10)
-			self.puzzle[x][0] = buff
-			used_num[buff] = 1
-
-		for x in range(0, 10):
-			used_num[x] = 0
-
-		# need to make this an array
-		cur_col = [0] * 11
-		cur_col[10] = 1
-		count = 0
-		retry_row = False
-		# second row creation
-		#for x in range(0,9):
-		# test for x = 1 - 1, row before or second row
-		# custom x range variable
-		x = 0
-		while(x < 8):
-			x = x + 1
-			if(retry_row == True):
-				x = x - 1
-				retry_row = False
-			for y in range(1, 9):
-				for z in range(0,x):
-					cur_col[self.puzzle[z][y]] = 1
-
-				used_num[self.puzzle[x][y - 1]] = 1
-				count = 0
-				while(cur_col[buff] != 0 or used_num[buff] != 0 and retry_row == False):
-					buff = random.randrange(1,10)
-					count = count + 1
-					if(count > 100):
-						retry_row = True
-				self.puzzle[x][y] = buff
-				# reset column checker
-				for r in range(0,10):
-					cur_col[r] = 0
-				if(retry_row):
-					#print("Retry row")
-					for z in range(1,9):
-						self.puzzle[x][z] = -1
+			while(1):
+				tmp = random.randrange(1,10)
+				if(avail_num[tmp] == 0):
+					self.puzzle[0][y] = tmp
+					avail_num[tmp] = 1
+					sequence[y] = tmp
 					break
-			for r in range(0,10):
-				used_num[r] = 0
+		for y in range(0,9):
+			self.puzzle[1][(y + 3) % 9] = sequence[y]
+		for y in range(0,9):
+			self.puzzle[2][(y + 6) % 9] = sequence[y]
+		
+		for y in range(0,9):
+			self.puzzle[3][(y + 1) % 9] = sequence[y]
+		for y in range(0,9):
+			self.puzzle[4][(y + 4) % 9] = sequence[y]
+		for y in range(0,9):
+			self.puzzle[5][(y + 7) % 9] = sequence[y]
+
+		for y in range(0,9):
+			self.puzzle[6][(y + 2) % 9] = sequence[y]
+		for y in range(0,9):
+			self.puzzle[7][(y + 5) % 9] = sequence[y]
+		for y in range(0,9):
+			self.puzzle[8][(y + 8) % 9] = sequence[y]
+
 		self.visible_p = deepcopy(self.puzzle)
+
+	def check_row(self, row, a):
+		for y in range(0,9):
+			if(self.puzzle[row][y] == a):
+				return False
+		return True
+
+	def check_column(self, column, a):
+		for x in range(0,9):
+			if(self.puzzle[x][column] == a):
+				return False
+		return True
+
+	def check_square(self, square, a):
+		if(square < 3):
+			for x in range(0,3):
+				for y in range(0,3):
+					if(self.puzzle[x + square*3][y] == a):
+						return False
+		elif(square < 6):
+			for x in range(0,3):
+				for y in range(3,6):
+					if(self.puzzle[x + square*3][y] == a):
+						return False
+		return True
+
+
+	def print_square(self, square):
+		str_t = ""
+		for x in range(0,3):
+			for y in range(0,3):
+				str_t = str_t + str(self.puzzle[x + square*3][y]) + " "
+			str_t += "\n"
+		print("Square: " + str_t)
 
 	def verify(self):
 		used_num = [0] * 10
@@ -187,21 +189,20 @@ class Sudoku:
 		return (correct - pre_placed, (81 - pre_placed))
 
 puzzle = Sudoku()
-puzzle.generate()
+
 #puzzle.hide_solution()
 submitted = False
 
 while(1):
-
-
 	if(os.name is "nt"):
 		os.system("cls")
 	else:
 		os.system("clear")
 	print(puzzle)
-
 	print(puzzle.verify())
 	raw_input()
+
+	print(puzzle.verify())
 	break
 
 	if(submitted == False):
