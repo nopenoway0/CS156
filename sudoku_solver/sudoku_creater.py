@@ -38,6 +38,7 @@ class Sudoku:
 		# Create first square
 		avail_num = [0] * 11
 		sequence = [0] * 10
+		inc = 0
 		for y in range(0,9):
 			while(1):
 				tmp = random.randrange(1,10)
@@ -46,25 +47,16 @@ class Sudoku:
 					avail_num[tmp] = 1
 					sequence[y] = tmp
 					break
-		for y in range(0,9):
-			self.puzzle[1][(y + 3) % 9] = sequence[y]
-		for y in range(0,9):
-			self.puzzle[2][(y + 6) % 9] = sequence[y]
-		
-		for y in range(0,9):
-			self.puzzle[3][(y + 1) % 9] = sequence[y]
-		for y in range(0,9):
-			self.puzzle[4][(y + 4) % 9] = sequence[y]
-		for y in range(0,9):
-			self.puzzle[5][(y + 7) % 9] = sequence[y]
-
-		for y in range(0,9):
-			self.puzzle[6][(y + 2) % 9] = sequence[y]
-		for y in range(0,9):
-			self.puzzle[7][(y + 5) % 9] = sequence[y]
-		for y in range(0,9):
-			self.puzzle[8][(y + 8) % 9] = sequence[y]
-
+		for x in range(1,9):
+			if(x == 1):
+				inc = 3
+			elif(x == 3):
+				inc = 1
+			elif(x == 6):
+				inc = 2
+			for y in range(0,9):
+				self.puzzle[x][(y + inc) % 9] = sequence[y]
+			inc += 3
 		self.visible_p = deepcopy(self.puzzle)
 
 	def check_row(self, row, a):
@@ -190,7 +182,7 @@ class Sudoku:
 
 puzzle = Sudoku()
 
-#puzzle.hide_solution()
+puzzle.hide_solution()
 submitted = False
 
 while(1):
@@ -199,11 +191,8 @@ while(1):
 	else:
 		os.system("clear")
 	print(puzzle)
-	print(puzzle.verify())
-	raw_input()
-
-	print(puzzle.verify())
-	break
+	while(puzzle.verify == False):
+		puzzle.generate()
 
 	if(submitted == False):
 		command = raw_input(puzzle.get_prompt())
