@@ -101,6 +101,7 @@ class Sudoku:
 
 	def verify(self):
 		used_num = [0] * 10
+		#check rows
 		for x in range (0,9):
 			for y in range (0,9):
 				if(used_num[self.puzzle[x][y]] == 1):
@@ -110,6 +111,7 @@ class Sudoku:
 			#reset used numbers
 			for r in range(0,10):
 				used_num[r] = 0
+		# check columns
 		for y in range (0,9):
 			for x in range (0,9):
 				if(used_num[self.puzzle[x][y]] == 1):
@@ -119,6 +121,18 @@ class Sudoku:
 			#reset used numbers
 			for r in range(0,10):
 				used_num[r] = 0
+
+		# check squares
+		for c in range(0,3):
+			for y in range (0,9):
+				for x in range (0,3):
+					if(used_num[self.puzzle[x + (c*3)][y]] == 1):
+						return (False, x + c*3, y, self.puzzle[x + (c*3)][y])
+					else:
+						used_num[self.puzzle[x + (c*3)][y]] = 1
+				if((y + 1) % 3 == 0):
+					for r in range(0,10):
+						used_num[r] = 0
 		return True
 
 	def hide_solution(self):
@@ -174,15 +188,22 @@ class Sudoku:
 
 puzzle = Sudoku()
 puzzle.generate()
-puzzle.hide_solution()
+#puzzle.hide_solution()
 submitted = False
+
 while(1):
+
 
 	if(os.name is "nt"):
 		os.system("cls")
 	else:
 		os.system("clear")
 	print(puzzle)
+
+	print(puzzle.verify())
+	raw_input()
+	break
+
 	if(submitted == False):
 		command = raw_input(puzzle.get_prompt())
 		if(command == "quit"):
