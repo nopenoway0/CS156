@@ -25,7 +25,6 @@ from utils import *
 import random, copy
 import pdb  # p = Python an db = debugger
 
-
 #______________________________________________________________________________
 
 class Object:
@@ -42,16 +41,6 @@ class Object:
     def display(self, canvas, x, y, width, height):
         """Display an image of this Object on the canvas."""
         pass
-
-# add attribute emmitted by objects
-class Emitter(Object):
-    sense = None
-
-    def set_sense(self, sense):
-        self.sense = sense
-
-    def get_sense(self):
-        return self.sense
 
 class Agent(Object):
     """An Agent is a subclass of Object with one required slot,
@@ -225,7 +214,6 @@ class Environment:
 	object.location = location or self.default_location(object)
 	self.objects.append(object)
 	if isinstance(object, Agent):
-            print("adding: " + str(object))
             object.performance = 0
             self.agents.append(object)
 	return self
@@ -401,23 +389,8 @@ class ReflexAgentWithState(Agent):
 #______________________________________________________________________________
 ## The Wumpus World
 
-class Glitter(Object): pass
-
-class Breeze(Object): pass
-
-class Gold(Object, Emitter):
-    def __init__(self):
-        self.sense = None
-        self.set_sense(Glitter)
-    def get_sense(self):
-        return self.sense()
-class Pit(Object, Emitter):
-    def __init__(self):
-        self.sense = None
-        self.set_sense(Breeze)
-    def get_sense(self):
-        return self.sense()
-
+class Gold(Object): pass
+class Pit(Object): pass
 class Arrow(Object): pass
 class Wumpus(Agent): pass
 class Explorer(Agent): pass
@@ -426,45 +399,13 @@ class WumpusEnvironment(XYEnvironment):
     object_classes = [Wall, Gold, Pit, Arrow, Wumpus, Explorer]
     def __init__(self, width=10, height=10):
         XYEnvironment.__init__(self, width, height)
-        self.agents = []
-        self.objects = []
-        self.add_walls()  
-
-    def add_object(self, object, location=(1, 1)):
-        XYEnvironment.add_object(self, object, location)
-        if(isinstance(object, Emitter)):
-            tmp = tuple(sum(item) for item in zip(location, (1,0)))
-            XYEnvironment.add_object(self, object.get_sense(), tmp)
-
-            tmp = tuple(sum(item) for item in zip(location, (0,1)))
-            XYEnvironment.add_object(self, object.get_sense(), tmp)
-
-            tmp = tuple(sum(item) for item in zip(location, (-1,0)))
-            XYEnvironment.add_object(self, object.get_sense(), tmp)
-
-            tmp = tuple(sum(item) for item in zip(location, (0,-1)))
-            XYEnvironment.add_object(self, object.get_sense(), tmp)
-
-
-
+        self.add_walls()
+    ## Needs a lot of work ...
     def percept(self, agent):
-        """The percept is a tuple of ('Dirty' or 'Clean', 'Bump' or 'None').
-        Unlike the TrivialVacuumEnvironment, location is NOT perceived."""
-        
-        #status =  if_(self.find_at(Dirt, agent.location), 'Dirty', 'Clean')
-        #bump = if_(agent.bump, 'Bump', 'None')
-        #return (status, bump)
-        location, direction, stench, breeze, glitter, bump, scream = ("", )*7
-        location = agent.location
-        direction = agent.orientation
-        stench = "None"
-        breeze = if_(self.find_at(Breeze, tuple(sum(item) for item in zip(location, direction))), "Breezy", "None")
-        glitter = if_(self.find_at(Glitter, tuple(sum(item) for item in zip(location, direction))), "Glitter", "None")
-        bump = "None"
-        scream = "None"
-        return tuple(location, direction, stench, breeze, bump, scream)
-    #def program(self):
-    #    print("Running")
+        return (1,0,1)
+
+
+    
 #______________________________________________________________________________
 
 def compare_agents(EnvFactory, AgentFactories, n=10, steps=1000):

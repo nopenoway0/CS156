@@ -45,19 +45,12 @@ def tests(kb):
 
 
 # Main Method
-kb = wumpus1()
-#print("Printing all rules from wumpus1: " + str(kb.clauses))
-print(tests(kb))
-page = cl.PLWumpusAgent()
+print("Started")
 env = []
-env.append(age.WumpusEnvironment(8, 8))
-env[0].add_object(age.Gold(), (3,3))
-#env[0].add_object(age.Wumpus(), (3,4))
-env[0].add_object(age.Pit(), (2,2))
-print(env[0].objects_at((3,2)))
-print(env[0].objects_at((0,0)))
-test = []
-test.append(age.XYEnvironment())
-#age.test_agent(page, 1000, env)
-env[0].add_object(page, (4,4))
-env[0].run()
+env.append(age.WumpusEnvironment())
+env[0].add_object(age.Gold(), (2,2))
+env[0].add_object(age.Wumpus(), (3,3))
+expl = cl.PLWumpusAgent()
+age.test_agent(cl.PLWumpusAgent, 1000, env)
+print("End")
+
