@@ -38,10 +38,11 @@ class Environment():
 	def getPercept(self):
 		ori_x, ori_y = self.agent.orientation
 		breeze, smell, glitter = (False, False, False)
-		if((self.agent.x + ori_x) < self.size and (self.agent.x + ori_x) > 0 and (self.agent.y + ori_y) > 0 and (self.agent.y + ori_y) < self.size and isinstance(self.board[self.agent.x + ori_x][self.agent.y + ori_y], Pit)):
-			breeze = True
-		if((self.agent.x + ori_x) < self.size and (self.agent.x + ori_x) > 0 and (self.agent.y + ori_y) > 0 and (self.agent.y + ori_y) < self.size and isinstance(self.board[self.agent.x + ori_x][self.agent.y + ori_y], Gold)):
-			glitter = True
+		if(self.agent.x + ori_x < self.size and self.agent.y + ori_y < self.size):
+			if(isinstance(self.board[self.agent.x + ori_x][self.agent.y + ori_y], Pit)):
+				breeze = True
+			if((self.agent.x + ori_x) < self.size and (self.agent.x + ori_x) > 0 and (self.agent.y + ori_y) > 0 and (self.agent.y + ori_y) < self.size and isinstance(self.board[self.agent.x + ori_x][self.agent.y + ori_y], Gold)):
+				glitter = True
 		self.execute_action(self.agent.program(breeze, smell, glitter, (5,5))) 
 
 	def step(self):
@@ -62,6 +63,7 @@ class Environment():
 			if(isinstance(self.board[x][y], Pit)):
 				self.game_over = True
 				self.game_over_m = "You died!"
+				self.agent.tell("P%d%d" % (x, y))
 				return
 			self.agent = obj
 			self.agent.x = x
