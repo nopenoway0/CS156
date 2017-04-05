@@ -1,0 +1,33 @@
+Main Module is self_imp.py. Run using python self_imp.py
+
+If you would like to change the environment, simply modify the coordinate of the pits at the beginning of self_imp.py
+
+##############################################-DEPENDENCIES-#############################################
+
+	This programming assignment did not use the template, as a result the logic was done using the logic module from the Sympy library. The Sympy must be installed as it is used for processing the propositional logic rules. Sympy is availabe on Canopy.
+
+#################################################-FILES-#################################################
+explorer.py contains the agent that runs off of propositional logic.
+environment.py contains the environment - which handles all percepts and execute_actions and contains the pit, gold, wumpus, and explorer
+self_imp.py contains the "main method". This is where the environment can be configured and it is the file that needs to run in order to start the simulation
+
+############################################-WHAT IT CAN DO-#############################################
+A simple UI is used. It looks much better running it from command prompt. It displays the current position of the explorer, designated by an arrow, and displays his location and orientation.
+
+* represent pits
+W represents Wumpus
+G represents Gold
+Arrow represents the explorer
+
+The explorer agent can find and avoid all pits and the Wumpus using purely the percepts from the environment and the ruleset given to it at the beginning of the game. The rules are derived from the slides in class. These rules appear on line 54 to 60 in the explorer.py file. Using these rules and the percepts picked up, it designates and remembers each pit and Wumpus that the prepositional logic returns true for. 
+
+The rule and current knowledge base is displayed at the bottom of the UI whenever a decision is being made
+
+It needs to be flushed periodically of old data in order to keep the program running quickly. It keeps important data such as pit and wumpus locations. The flush function is located in explorer.py starting on line 88
+
+############################################-WHAT IT CANT DO-############################################
+The explorer agent is a reflex agent built on top of prepositional logic to avoid hazards. It has implemented, as required by the assignment, the use of propositional logic to predict where the pits and Wumpus in the map are. As a result, there are configurations that will put the agent into an infinite loop - although it will correctly avoid the pits and Wumpus.
+
+The performance metric is simply the amount of moves performed by the agent. Turns count as a move in addition to actual forward movements
+
+There is no implementation for killing the Wumpus

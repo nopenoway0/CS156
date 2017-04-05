@@ -17,12 +17,20 @@ player.tell("~P01")
 
 start_location = (0,0)
 board.place_object(start_location, player)
+
+
+#############CHANGE ENVIRONMENT HERE##########################
+
 board.place_object((3,0), Pit())
 board.place_object((4,4), Gold())
 board.place_object((3,3), Pit())
 board.place_object((0,4), Pit())
 board.place_object((2,1), Pit())
 board.place_object((1,2), Wumpus())
+
+###############################################################
+
+
 
 while(board.game_over == False):
 	if(os.name is "posix"):
@@ -36,7 +44,7 @@ while(board.game_over == False):
 	print("Knowledge: " + str(board.agent.kb) + "\n\n")
 	print("Rule set: " + str(board.agent.rule_set))
 	board.step()
-	time.sleep(1)
+	time.sleep(0.5)
 	if(board.game_over_m == "You died!"):
 		board.game_over_m = ""
 		board.game_over = False
@@ -49,5 +57,8 @@ else:
 	os.system("cls")
 print("Game Over?: " + board.game_over_m)
 print(board.getString())
-print("Found the dangers at: " + str(board.agent.pits) + "\n\n")
-print("Rule set: " + str(board.agent.rule_set))
+print("Found the pits at: " + str(board.agent.pits))
+if(board.agent.wumpus != None):
+	print("Found Wumpus at: " + str(board.agent.wumpus))
+print("Completed in " + str(board.agent.moves) + " moves")
+#print("Rule set: " + str(board.agent.rule_set))

@@ -52,7 +52,7 @@ class Environment():
 			if((self.agent.x + ori_x) < self.size and (self.agent.x + ori_x) > 0 and (self.agent.y + ori_y) > 0 and (self.agent.y + ori_y) < self.size and isinstance(self.board[self.agent.x + ori_x][self.agent.y + ori_y], Gold)):
 				glitter = True
 			if(isinstance(self.board[self.agent.x + ori_x][self.agent.y + ori_y], Wumpus)):
-				breeze = True
+				smell = True
 		self.execute_action(self.agent.program(breeze, smell, glitter, (5,5))) 
 
 	# Advance program 1 step
@@ -94,9 +94,8 @@ class Environment():
 	# takes the action from the agent and performs the neccessary operations on it
 	def execute_action(self, action):
 		f_x, f_y = self.agent.orientation
+		self.agent.moves += 1
 		if(action == "forward"):
-			#self.agent.x += f_x
-			#self.agent.y += f_x
 			self.move_object((self.agent.x + f_x, self.agent.y + f_y), self.agent)
 		elif(action == "turn left"):
 			if(f_x == -1):
