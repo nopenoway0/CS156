@@ -1,8 +1,0 @@
-Using python to open the .py should start the interactive sudoku game. The important methods are:
-	Generate - creates a new randomly generated sudoku puzzle
-	
-	hide_solution - obfuscates the solution
-
-	submit - compares entered answers to the correct answers and returns total correct and possible correct in a tuple
-
-	execute - takes user input and applys as expected, the main is responsible for submit and quit calls
