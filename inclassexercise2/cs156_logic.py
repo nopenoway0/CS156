@@ -32,31 +32,6 @@ import utils_lpw
 #import utils as utils_lpw
 
 
-# FOLKKB
-def FOLKB():
-    print("\nWumpus 1 start\n")
-    kb = PropKB()
-    # Rule 1 - 5
-    kb.tell(expr("~P11"))
-    kb.tell(expr("B11 <=> (P12 | P21)"))
-    kb.tell(expr("B21 <=> (P11 | P22 | P31)"))
-    kb.tell(expr("~B11"))
-    kb.tell(expr("B21"))
-
-    # Rule 6 - 10
-    kb.tell(expr("B11 >> (P12 | P21) & ((P12 | P21)) >> B11"))
-    kb.tell(expr("((P12 | P21) >> B11)"))
-    kb.tell(expr("~B11 >> ~(P12 | P21)"))
-    kb.tell(expr("~(P12 | P21)"))
-    kb.tell(expr("~P12 & ~P21"))
-
-    # Rule 11 - 15
-    kb.tell(expr("~B12"))
-    kb.tell(expr("B12 <=> (P11 | P22 | P13)"))
-    kb.tell(expr("~P22"))
-    kb.tell(expr("~P13"))
-    return kb
-
 #______________________________________________________________________________
 
 class KB:
@@ -703,15 +678,17 @@ def WalkSAT(clauses, p=0.5, max_flips=10000):
 class PLWumpusAgent(agents.Agent):
     "An agent for the wumpus world that does logical inference. [Fig. 7.19]"""
     def __init__(self):
-        KB = FOLKB()
+        # Changed to PropKB = FOLKB()
+        print("created agent")
+        KB = PropKB()
         x, y, orientation = 1, 1, (1, 0)
         visited = set() ## squares already visited
         action = None
         plan = []
 
         def program(percept):
-            print("test")
-            return 0
+            # setting percept for environment
+            print("recieved percept - CS156logic 690")
             stench, breeze, glitter = percept
             x, y, orientation = update_position(x, y, orientation, action)
             KB.tell('%sS_%d,%d' % (if_(stench, '', '~'), x, y))
